@@ -14,6 +14,7 @@ import type { PendingCommunitySignal } from '../types/pendingReport';
 import type { NearbySignalCounts } from '../utils/safetySignalCounts';
 
 interface HomeDashboardProps {
+  displayName: string;
   locationStatus: CurrentLocationStatus;
   nearbyCounts: NearbySignalCounts | null;
   pendingReports: PendingCommunitySignal[];
@@ -26,6 +27,12 @@ interface HomeDashboardProps {
 
 const pluralize = (count: number, singular: string, plural: string) =>
   `${count} ${count === 1 ? singular : plural}`;
+
+const greetingForHour = (hour: number) => {
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+};
 
 const formatRemaining = (remainingMs: number) => {
   const totalMinutes = Math.max(0, Math.ceil(remainingMs / 60_000));
@@ -59,6 +66,7 @@ const locationMessage = (status: CurrentLocationStatus) => {
 };
 
 export const HomeDashboard: React.FC<HomeDashboardProps> = ({
+  displayName,
   locationStatus,
   nearbyCounts,
   pendingReports,
@@ -84,12 +92,16 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     : activeWalk?.status === 'HELP_REQUESTED'
       ? 'Help requested — prototype status only'
       : formatRemaining(walkController.remainingMs);
+  const trimmedDisplayName = displayName.trim();
+  const homeHeading = trimmedDisplayName
+    ? `${greetingForHour(new Date().getHours())}, ${trimmedDisplayName}`
+    : 'Your safety tools, in one place.';
 
   return (
     <div className="home-dashboard animate-fade-in">
       <section className="home-greeting" aria-labelledby="home-title">
         <span className="home-eyebrow">Nidarr prototype</span>
-        <h2 id="home-title">Your safety tools, in one place.</h2>
+        <h2 id="home-title">{homeHeading}</h2>
         <p>Review nearby prototype signals or quickly open a safety feature.</p>
       </section>
 

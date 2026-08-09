@@ -13,10 +13,15 @@ import {
 } from 'lucide-react';
 import type { WalkSessionController } from '../hooks/useWalkSession';
 import type { WalkLocationAvailability } from '../types/walkSession';
+import { USER_PROFILE_FIELD_LIMITS } from '../types/userProfile';
 import { HelpRequestConfirmationSheet } from './HelpRequestConfirmationSheet';
 
 interface WalkWithMeProps {
   controller: WalkSessionController;
+  defaultTrustedContact: {
+    name: string;
+    phone: string;
+  };
   onViewSafetyMap: () => void;
 }
 
@@ -58,12 +63,12 @@ const locationMessage = (availability: WalkLocationAvailability) => {
   }
 };
 
-export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, onViewSafetyMap }) => {
+export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, defaultTrustedContact, onViewSafetyMap }) => {
   const [destination, setDestination] = useState('');
   const [duration, setDuration] = useState<(typeof DURATION_OPTIONS)[number]['value']>('30');
   const [customMinutes, setCustomMinutes] = useState('');
-  const [contactName, setContactName] = useState('');
-  const [contactPhone, setContactPhone] = useState('');
+  const [contactName, setContactName] = useState(() => defaultTrustedContact.name);
+  const [contactPhone, setContactPhone] = useState(() => defaultTrustedContact.phone);
   const [formError, setFormError] = useState<string | null>(null);
   const [isHelpConfirmationOpen, setIsHelpConfirmationOpen] = useState(false);
 
@@ -87,6 +92,17 @@ export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, onViewSafety
       durationMinutes,
       trustedContact: { name: contactName.trim(), phone: contactPhone.trim() || undefined },
     });
+  };
+
+  const handleStartAnotherSession = () => {
+    setDestination('');
+    setDuration('30');
+    setCustomMinutes('');
+    setContactName(defaultTrustedContact.name);
+    setContactPhone(defaultTrustedContact.phone);
+    setFormError(null);
+    setIsHelpConfirmationOpen(false);
+    controller.resetSession();
   };
 
   if (controller.status === 'SETUP' || !controller.session) {
@@ -158,6 +174,7 @@ export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, onViewSafety
                 className="form-input"
                 value={contactName}
                 onChange={(event) => setContactName(event.target.value)}
+                maxLength={USER_PROFILE_FIELD_LIMITS.trustedContactName}
                 placeholder="e.g. Ananya"
               />
             </div>
@@ -169,6 +186,7 @@ export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, onViewSafety
                 type="tel"
                 value={contactPhone}
                 onChange={(event) => setContactPhone(event.target.value)}
+                maxLength={USER_PROFILE_FIELD_LIMITS.trustedContactPhone}
                 placeholder="For prototype display only"
                 autoComplete="off"
               />
@@ -196,7 +214,7 @@ export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, onViewSafety
         <h2>Walk completed</h2>
         <p>Your prototype session is marked completed safely.</p>
         <div className="walk-terminal-summary"><strong>{session.destination}</strong><span>Completed at {formatTime(session.completedAt ?? new Date().toISOString())}</span></div>
-        <button type="button" className="btn btn-primary btn-full" onClick={controller.resetSession}>Start another session</button>
+        <button type="button" className="btn btn-primary btn-full" onClick={handleStartAnotherSession}>Start another session</button>
       </section>
     );
   }
@@ -207,7 +225,7 @@ export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, onViewSafety
         <div className="walk-terminal-icon walk-terminal-icon--ended"><Square size={34} /></div>
         <h2>Session ended</h2>
         <p>No contact or emergency service was notified.</p>
-        <button type="button" className="btn btn-primary btn-full" onClick={controller.resetSession}>Start another session</button>
+        <button type="button" className="btn btn-primary btn-full" onClick={handleStartAnotherSession}>Start another session</button>
       </section>
     );
   }

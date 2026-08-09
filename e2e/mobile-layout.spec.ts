@@ -58,6 +58,32 @@ test('mobile shell and critical map controls fit without horizontal overflow', a
   await expect(page.locator('.mobile-nav')).toBeVisible();
   expect(await isWithinViewport(page.locator('.mobile-nav'))).toBe(true);
 
+  await page.locator('.mobile-nav').getByRole('button', { name: 'Profile', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Your Profile' })).toBeVisible();
+  await expect(page.getByText('Location access denied', { exact: true })).toBeVisible();
+  await expect(page.locator('#profile-display-name')).toHaveAttribute('maxlength', '60');
+  await expect(page.locator('#profile-contact-name')).toHaveAttribute('maxlength', '80');
+  await expect(page.locator('#profile-contact-phone')).toHaveAttribute('maxlength', '30');
+  await expect(page.locator('#profile-home-area')).toHaveAttribute('maxlength', '120');
+  await page.locator('#profile-display-name').fill('A profile name that remains usable on narrow mobile layouts');
+  await page.locator('#profile-contact-name').fill('A trusted contact with a deliberately long but valid display name');
+  await page.locator('#profile-contact-phone').fill('+91 98765 43210 ext 123');
+  await page.locator('#profile-home-area').fill('A plain-text home area description that wraps without becoming a map position');
+  await page.getByRole('button', { name: 'Save Profile' }).click();
+  await expect(page.getByText('Profile saved on this device.')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  expect(await page.locator('.app-body').evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+
+  const resetButton = page.getByRole('button', { name: 'Reset Demo Data' });
+  await resetButton.scrollIntoViewIfNeeded();
+  await expect(resetButton).toBeVisible();
+  expect(await isWithinViewport(resetButton)).toBe(true);
+  await resetButton.click();
+  const resetDialog = page.getByRole('dialog', { name: 'Reset Nidarr prototype?' });
+  await expect(resetDialog).toBeVisible();
+  await expect.poll(() => isWithinViewport(resetDialog)).toBe(true);
+  await resetDialog.getByRole('button', { name: 'Cancel' }).click();
+
   await page.locator('.mobile-nav').getByRole('button', { name: 'Safety Map', exact: true }).click();
   await expect(page.locator('.leaflet-map')).toBeVisible();
   await expect(page.locator('.geo-toast')).toBeVisible();

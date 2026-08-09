@@ -6,12 +6,13 @@ import { AnalysisCard } from './components/AnalysisCard';
 import { HomeDashboard } from './components/HomeDashboard';
 import { SafetyMap } from './components/SafetyMap';
 import { WalkWithMe } from './components/WalkWithMe';
-import { ComingSoon } from './components/ComingSoon';
+import { Profile } from './components/Profile';
 import { MobileNavigation } from './components/MobileNavigation';
 import { LocationConfirmationSheet } from './components/LocationConfirmationSheet';
 import type { NavTab } from './components/MobileNavigation';
 import type { IncidentFormData, AnalysisResult } from './types/incident';
 import type { PendingCommunitySignal } from './types/pendingReport';
+import type { UserProfile } from './types/userProfile';
 import { analyseIncidentReport } from './services/api';
 import { useWalkSession } from './hooks/useWalkSession';
 import { useCurrentLocation } from './hooks/useCurrentLocation';
@@ -22,6 +23,11 @@ import {
   loadPendingReports,
   savePendingReport,
 } from './services/pendingReportsStorage';
+import {
+  clearUserProfile,
+  loadUserProfile,
+  saveUserProfile,
+} from './services/userProfileStorage';
 import { AlertTriangle, CheckCircle2, MapPinned, XCircle } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -31,6 +37,7 @@ export const App: React.FC = () => {
   const [submittedReport, setSubmittedReport] = useState<IncidentFormData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [pendingReports, setPendingReports] = useState<PendingCommunitySignal[]>(() => loadPendingReports());
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(() => loadUserProfile());
   const [isLocationConfirmationOpen, setIsLocationConfirmationOpen] = useState(false);
   const [isSavingPendingReport, setIsSavingPendingReport] = useState(false);
   const [pendingSaveError, setPendingSaveError] = useState<string | null>(null);
@@ -172,6 +179,12 @@ export const App: React.FC = () => {
     setActiveTab('map');
   };
 
+  const handleSaveUserProfile = (profile: UserProfile) => {
+    const savedProfile = saveUserProfile(profile);
+    setUserProfile(savedProfile);
+    return savedProfile;
+  };
+
   const handleResetDemoData = () => {
     // Invalidate in-flight analysis first so it cannot repopulate cleared UI state.
     analysisRequestIdRef.current += 1;
@@ -180,9 +193,11 @@ export const App: React.FC = () => {
     pendingDraftIdRef.current = null;
 
     clearPendingReports();
+    clearUserProfile();
     walkController.resetSession();
 
     setPendingReports([]);
+    setUserProfile(null);
     setIsAnalyzing(false);
     setAnalysisResult(null);
     setSubmittedReport(null);
@@ -234,6 +249,7 @@ export const App: React.FC = () => {
                 </div>
               )}
               <HomeDashboard
+                displayName={userProfile?.displayName ?? ''}
                 locationStatus={overviewLocationStatus}
                 nearbyCounts={homeNearbyCounts}
                 pendingReports={pendingReports}
@@ -322,11 +338,26 @@ export const App: React.FC = () => {
 
           {/* ── Walk With Me ── */}
           {activeTab === 'walk' && (
-            <WalkWithMe controller={walkController} onViewSafetyMap={handleOpenSafetyMap} />
+            <WalkWithMe
+              controller={walkController}
+              defaultTrustedContact={{
+                name: userProfile?.trustedContactName ?? '',
+                phone: userProfile?.trustedContactPhone ?? '',
+              }}
+              onViewSafetyMap={handleOpenSafetyMap}
+            />
           )}
 
-          {/* ── Coming Soon screen ── */}
-          {activeTab === 'profile' && <ComingSoon tab="profile" onResetDemoData={handleResetDemoData} />}
+          {/* ── Profile ── */}
+          {activeTab === 'profile' && (
+            <Profile
+              profile={userProfile}
+              locationStatus={currentLocation.status}
+              pendingReportCount={pendingReports.length}
+              onSaveProfile={handleSaveUserProfile}
+              onResetDemoData={handleResetDemoData}
+            />
+          )}
         </main>
 
         {isLocationConfirmationOpen && (

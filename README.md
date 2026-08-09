@@ -46,7 +46,7 @@ Nidarr explores one mobile experience that connects those tasks while clearly se
 | **🏠 Home dashboard**<br/>Factual nearby counts, quick actions, active Walk With Me status, and recent pending reports. | **🗺️ Safety Map**<br/>OpenStreetMap through React Leaflet, seven bundled fictional signals, current-location centring, separate demo/pending counts, details sheets, and tile-failure messaging. |
 | **✨ Gemini incident analysis**<br/>Structured provisional analysis through the Express backend, protected by an 18-second frontend timeout with retry. | **📍 User-confirmed location**<br/>Relevant reports use browser geolocation or a manually selected map point. Gemini never supplies latitude or longitude. |
 | **🟣 Pending community signals**<br/>User reports are purple, explicitly unverified, device-local, and separate from demonstration risk counts. | **🚶 Walk With Me**<br/>Foreground-only timed sessions, optional trusted-contact details, timestamp-derived countdowns, check-ins, simulated help, latest-location updates, restoration, and a labelled demo trigger. |
-| **🧹 Prototype reset**<br/>A confirmed Profile control removes only Nidarr-owned local state while preserving bundled demo signals. | **📱 Mobile navigation**<br/>Home, Safety Map, Report, Walk With Me, and Profile flows tested at 360px, 390px, and 430px. |
+| **🧹 Prototype reset**<br/>A confirmed Profile control removes only Nidarr-owned local state while preserving bundled demo signals. | **👤 Local profile**<br/>Device-local personalisation, optional home-area text, trusted-contact Walk defaults, activity, and browser location availability. |
 
 ## Product workflow
 
@@ -161,7 +161,7 @@ The browser owns presentation, geolocation, map interaction, and prototype state
 - The Gemini key remains server-side and is read only from `process.env.GEMINI_API_KEY`.
 - `.env` is ignored by Git; `.env.example` contains a placeholder only.
 - The frontend calls `/api/analyse` and never receives the Gemini credential.
-- `localStorage` is used only for pending reports and the current Walk With Me session.
+- `localStorage` is used only for the local profile, pending reports, and the current Walk With Me session.
 - Stored prototype data is device-local, unauthenticated, and is not secure or durable storage.
 - Trusted-contact phone numbers are masked in the active-session UI and are not intentionally logged.
 
@@ -257,6 +257,7 @@ The Chromium suite covers:
 - pending-marker persistence and focus cleanup
 - geolocation success and denial
 - Walk With Me restoration, check-in, simulated help, and watcher cleanup
+- profile persistence, personalisation, Walk autofill, malformed-storage recovery, and mobile layouts
 - prototype reset and unrelated-storage preservation
 
 UI-flow tests mock `/api/analyse`; a real Gemini smoke test remains separate and optional.
@@ -266,12 +267,11 @@ UI-flow tests mock `/api/analyse`; a real Gemini smoke test remains separate and
 ## Known limitations
 
 - No authentication, database, server-side report persistence, or cross-device synchronization.
-- Pending reports and Walk With Me state can be cleared with browser storage.
+- Profile, pending-report, and Walk With Me state can be cleared with browser storage.
 - No moderation or community-verification workflow is implemented.
 - Gemini analysis and OpenStreetMap tiles require network access and may be affected by latency, quota, or service availability.
 - Browser geolocation can be denied, unavailable, or inaccurate.
 - No geocoding, external routing, background location tracking, or objective "safest route" calculation.
-- The Profile experience is primarily a placeholder plus prototype reset controls.
 - The prototype has not received production privacy, abuse-prevention, accessibility, or security hardening.
 
 ## Roadmap

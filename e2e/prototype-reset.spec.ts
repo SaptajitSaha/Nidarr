@@ -3,6 +3,7 @@ import { expect, test } from './fixtures';
 
 const PENDING_REPORTS_STORAGE_KEY = 'nidarr_pending_reports_v1';
 const WALK_SESSION_STORAGE_KEY = 'nidarr_walk_session_v1';
+const USER_PROFILE_STORAGE_KEY = 'nidarr_user_profile_v1';
 const UNRELATED_STORAGE_KEY = 'unrelated_app_preference';
 const TRANSPARENT_PNG = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
@@ -126,18 +127,25 @@ test('reset confirmation preserves on cancel and clears only Nidarr prototype st
 
   await page.locator('.mobile-nav').getByRole('button', { name: 'Profile', exact: true }).click();
   await expect(page.getByText('Prototype controls')).toBeVisible();
+  await page.locator('#profile-display-name').fill('Saptajit');
+  await page.locator('#profile-contact-name').fill('Ananya');
+  await page.locator('#profile-contact-phone').fill('9876543210');
+  await page.getByRole('button', { name: 'Save Profile' }).click();
+  await expect.poll(async () => page.evaluate((key) => localStorage.getItem(key), USER_PROFILE_STORAGE_KEY)).not.toBeNull();
   await page.getByRole('button', { name: 'Reset Demo Data' }).click();
 
   const dialog = page.getByRole('dialog', { name: 'Reset Nidarr prototype?' });
   await expect(dialog).toBeVisible();
   await expect(dialog).toContainText('Delete locally stored pending community reports');
   await expect(dialog).toContainText('End and remove the current Walk With Me session');
-  await expect(dialog).toContainText('Seeded demonstration safety signals will not be affected.');
+  await expect(dialog).toContainText('Delete the profile saved on this device');
+  await expect(dialog).toContainText('Seeded demonstration safety signals and browser permission state will not be affected.');
 
   await dialog.getByRole('button', { name: 'Cancel' }).click();
   await expect(dialog).toHaveCount(0);
   await expect.poll(async () => page.evaluate((key) => localStorage.getItem(key), PENDING_REPORTS_STORAGE_KEY)).not.toBeNull();
   await expect.poll(async () => page.evaluate((key) => localStorage.getItem(key), WALK_SESSION_STORAGE_KEY)).not.toBeNull();
+  await expect.poll(async () => page.evaluate((key) => localStorage.getItem(key), USER_PROFILE_STORAGE_KEY)).not.toBeNull();
   await expect.poll(async () => (await geolocationState(page)).activeWatchers.length).toBe(1);
   expect(await page.evaluate((key) => localStorage.getItem(key), UNRELATED_STORAGE_KEY)).toBe('keep-me');
 
@@ -152,6 +160,7 @@ test('reset confirmation preserves on cancel and clears only Nidarr prototype st
   await expect(page.locator('.location-confirmation-overlay, .details-sheet, .map-save-success')).toHaveCount(0);
   await expect.poll(async () => page.evaluate((key) => localStorage.getItem(key), PENDING_REPORTS_STORAGE_KEY)).toBeNull();
   await expect.poll(async () => page.evaluate((key) => localStorage.getItem(key), WALK_SESSION_STORAGE_KEY)).toBeNull();
+  await expect.poll(async () => page.evaluate((key) => localStorage.getItem(key), USER_PROFILE_STORAGE_KEY)).toBeNull();
   await expect.poll(async () => (await geolocationState(page)).activeWatchers.length).toBe(0);
   await expect.poll(async () => (await geolocationState(page)).clearCalls).toBeGreaterThanOrEqual(1);
   expect(await page.evaluate((key) => localStorage.getItem(key), UNRELATED_STORAGE_KEY)).toBe('keep-me');
@@ -168,4 +177,5 @@ test('reset confirmation preserves on cancel and clears only Nidarr prototype st
   expect(await page.evaluate((key) => localStorage.getItem(key), UNRELATED_STORAGE_KEY)).toBe('keep-me');
   expect(await page.evaluate((key) => localStorage.getItem(key), PENDING_REPORTS_STORAGE_KEY)).toBeNull();
   expect(await page.evaluate((key) => localStorage.getItem(key), WALK_SESSION_STORAGE_KEY)).toBeNull();
+  expect(await page.evaluate((key) => localStorage.getItem(key), USER_PROFILE_STORAGE_KEY)).toBeNull();
 });
