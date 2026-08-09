@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import {
   AlertCircle,
+  Ambulance,
   Clock3,
   Footprints,
   MapPinned,
@@ -19,6 +20,8 @@ interface HomeDashboardProps {
   nearbyCounts: NearbySignalCounts | null;
   pendingReports: PendingCommunitySignal[];
   walkController: WalkSessionController;
+  emergencyLocationActive: boolean;
+  onOpenEmergencyToolkit: () => void;
   onOpenQuickSafetyCheck: () => void;
   onViewSafetyMap: () => void;
   onReportIncident: () => void;
@@ -72,6 +75,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   nearbyCounts,
   pendingReports,
   walkController,
+  emergencyLocationActive,
+  onOpenEmergencyToolkit,
   onOpenQuickSafetyCheck,
   onViewSafetyMap,
   onReportIncident,
@@ -142,6 +147,13 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       <section className="home-quick-actions" aria-labelledby="home-actions-title">
         <div className="home-section-title-row"><h3 id="home-actions-title">Quick actions</h3></div>
         <div className="home-action-grid">
+          <button type="button" className="home-action home-action--emergency" onClick={onOpenEmergencyToolkit}>
+            <span className="home-action-icon"><Ambulance size={22} /></span>
+            <span>
+              <strong>Emergency Toolkit</strong>
+              <small>{emergencyLocationActive ? 'Foreground location tracking active' : 'Calls, siren and foreground location tools'}</small>
+            </span>
+          </button>
           <button type="button" className="home-action home-action--quick-check" onClick={onOpenQuickSafetyCheck}>
             <span className="home-action-icon"><ShieldCheck size={22} /></span>
             <span>

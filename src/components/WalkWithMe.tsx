@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   AlertTriangle,
+  Ambulance,
   CheckCircle2,
   Clock3,
   Footprints,
@@ -15,6 +16,7 @@ import type { WalkSessionController } from '../hooks/useWalkSession';
 import type { WalkLocationAvailability } from '../types/walkSession';
 import { USER_PROFILE_FIELD_LIMITS } from '../types/userProfile';
 import { HelpRequestConfirmationSheet } from './HelpRequestConfirmationSheet';
+import { maskPhoneNumber } from '../utils/phoneNumber';
 
 interface WalkWithMeProps {
   controller: WalkSessionController;
@@ -23,6 +25,7 @@ interface WalkWithMeProps {
     phone: string;
   };
   onViewSafetyMap: () => void;
+  onOpenEmergencyToolkit: () => void;
 }
 
 const DURATION_OPTIONS = [
@@ -46,12 +49,6 @@ const formatCountdown = (remainingMs: number) => {
     : `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-const maskPhoneNumber = (phone?: string) => {
-  if (!phone) return 'Not provided';
-  const digits = phone.replace(/\D/g, '');
-  return digits.length > 0 ? `******${digits.slice(-4)}` : 'Not provided';
-};
-
 const locationMessage = (availability: WalkLocationAvailability) => {
   switch (availability) {
     case 'available': return 'Current location available in this foreground session.';
@@ -63,7 +60,7 @@ const locationMessage = (availability: WalkLocationAvailability) => {
   }
 };
 
-export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, defaultTrustedContact, onViewSafetyMap }) => {
+export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, defaultTrustedContact, onViewSafetyMap, onOpenEmergencyToolkit }) => {
   const [destination, setDestination] = useState('');
   const [duration, setDuration] = useState<(typeof DURATION_OPTIONS)[number]['value']>('30');
   const [customMinutes, setCustomMinutes] = useState('');
@@ -241,6 +238,7 @@ export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, defaultTrust
           <span>{latestCoordinates ? 'Your current location would be shared.' : 'No current location is available to share.'}</span>
         </div>
         <div className="walk-help-actions">
+          <button type="button" className="btn btn-emergency btn-full" onClick={onOpenEmergencyToolkit}><Ambulance size={17} />Open Emergency Toolkit</button>
           <button type="button" className="btn btn-primary btn-full" onClick={onViewSafetyMap}><MapPinned size={17} />Return to Safety Map</button>
           <button type="button" className="btn btn-secondary btn-full" onClick={controller.endSession}>End Session</button>
         </div>

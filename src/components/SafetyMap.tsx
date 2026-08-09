@@ -15,7 +15,7 @@ import { countNearbySafetySignals } from '../utils/safetySignalCounts';
 import { RiskDetailsSheet } from './RiskDetailsSheet';
 import { PendingSignalDetailsSheet } from './PendingSignalDetailsSheet';
 import { MapLegend } from './MapLegend';
-import { Crosshair, FileWarning, Footprints } from 'lucide-react';
+import { Crosshair, FileWarning, Footprints, LocateFixed } from 'lucide-react';
 
 const KOLKATA_CENTER: LatLngTuple = [22.5726, 88.3639];
 const DEFAULT_ZOOM = 13;
@@ -25,10 +25,13 @@ interface SafetyMapProps {
   focusedPendingReportId: string | null;
   walkWithMeActive: boolean;
   journeyPosition: LatLngTuple | null;
+  emergencyLocationActive: boolean;
+  emergencyPosition: LatLngTuple | null;
   currentPosition: LatLngTuple | null;
   locationStatus: CurrentLocationStatus;
   onFocusedPendingReportClose: () => void;
   onNavigateToReport: () => void;
+  onOpenEmergencyToolkit: () => void;
 }
 
 const InitialLocationController: React.FC<{ position: LatLngTuple | null }> = ({ position }) => {
@@ -91,10 +94,13 @@ export const SafetyMap: React.FC<SafetyMapProps> = ({
   focusedPendingReportId,
   walkWithMeActive,
   journeyPosition,
+  emergencyLocationActive,
+  emergencyPosition,
   currentPosition,
   locationStatus,
   onFocusedPendingReportClose,
   onNavigateToReport,
+  onOpenEmergencyToolkit,
 }) => {
   const [userPosition, setUserPosition] = useState<LatLngTuple | null>(null);
   const [mapCenter, setMapCenter] = useState<LatLngTuple>(KOLKATA_CENTER);
@@ -102,7 +108,7 @@ export const SafetyMap: React.FC<SafetyMapProps> = ({
   const [selectedPendingReport, setSelectedPendingReport] = useState<PendingCommunitySignal | null>(null);
   const [tileError, setTileError] = useState(false);
   const [recenterTrigger, setRecenterTrigger] = useState(0);
-  const displayPosition = journeyPosition ?? currentPosition;
+  const displayPosition = emergencyPosition ?? journeyPosition ?? currentPosition;
   const displayLatitude = displayPosition?.[0];
   const displayLongitude = displayPosition?.[1];
 
@@ -150,6 +156,13 @@ export const SafetyMap: React.FC<SafetyMapProps> = ({
           </div>
         )}
 
+        {emergencyLocationActive && (
+          <button type="button" className="emergency-map-status-chip" onClick={onOpenEmergencyToolkit}>
+            <LocateFixed size={13} />
+            <span>Emergency location active</span>
+          </button>
+        )}
+
         {!displayPosition && (locationStatus === 'denied' || locationStatus === 'unavailable' || locationStatus === 'unsupported') && (
           <div className="geo-toast animate-fade-in">
             {locationStatus === 'denied'
@@ -178,10 +191,11 @@ export const SafetyMap: React.FC<SafetyMapProps> = ({
         />
 
         <TileErrorWatcher onError={() => setTileError(true)} />
-        <InitialLocationController position={currentPosition} />
+        <InitialLocationController position={emergencyPosition ?? currentPosition} />
         <RecenterController center={mapCenter} trigger={recenterTrigger} />
         <PendingReportFocusController report={focusedPendingReport} />
         <JourneyPositionController position={journeyPosition} active={walkWithMeActive} />
+        <JourneyPositionController position={emergencyPosition} active={emergencyLocationActive} />
 
         {/* Demo safety signal markers */}
         {DEMO_SAFETY_SIGNALS.map((signal) => (

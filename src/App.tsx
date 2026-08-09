@@ -10,6 +10,7 @@ import { Profile } from './components/Profile';
 import { MobileNavigation } from './components/MobileNavigation';
 import { LocationConfirmationSheet } from './components/LocationConfirmationSheet';
 import { QuickSafetyCheckSheet } from './components/QuickSafetyCheckSheet';
+import { EmergencyToolkit } from './components/EmergencyToolkit';
 import type { NavTab } from './components/MobileNavigation';
 import type { IncidentFormData, AnalysisResult } from './types/incident';
 import type { PendingCommunitySignal } from './types/pendingReport';
@@ -18,6 +19,7 @@ import { analyseIncidentReport } from './services/api';
 import { useWalkSession } from './hooks/useWalkSession';
 import { useCurrentLocation } from './hooks/useCurrentLocation';
 import { useAppearance } from './hooks/useAppearance';
+import { useEmergencyToolkit } from './hooks/useEmergencyToolkit';
 import { countNearbySafetySignals, summarizeNearbySafetySignals } from './utils/safetySignalCounts';
 import {
   createPendingReportId,
@@ -32,6 +34,7 @@ import {
 } from './services/userProfileStorage';
 import { AlertTriangle, CheckCircle2, MapPinned, XCircle } from 'lucide-react';
 import type { AppearancePreference } from './types/appearance';
+import { maskPhoneNumber, normalizeDialablePhoneNumber } from './utils/phoneNumber';
 
 interface AppProps {
   initialAppearancePreference: AppearancePreference;
@@ -59,6 +62,7 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
   const walkController = useWalkSession();
   const currentLocation = useCurrentLocation();
   const appearanceController = useAppearance(initialAppearancePreference);
+  const emergencyController = useEmergencyToolkit();
 
   useEffect(() => {
     if (prototypeResetNoticeId === 0) return;
@@ -112,7 +116,13 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
 
   const handleTabChange = (tab: NavTab) => {
     setIsQuickSafetyCheckOpen(false);
+    emergencyController.closeToolkit();
     setActiveTab(tab);
+  };
+
+  const handleOpenEmergencyToolkit = () => {
+    setIsQuickSafetyCheckOpen(false);
+    emergencyController.openToolkit();
   };
 
   const handleOpenLocationConfirmation = () => {
@@ -176,18 +186,19 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
   const handleViewSavedReport = () => {
     if (!savedPendingReport) return;
     setFocusedPendingReportId(savedPendingReport.id);
-    setActiveTab('map');
+    handleTabChange('map');
   };
 
   const handleOpenSafetyMap = () => {
     setIsQuickSafetyCheckOpen(false);
+    emergencyController.closeToolkit();
     setFocusedPendingReportId(null);
     setActiveTab('map');
   };
 
   const handleViewPendingReport = (reportId: string) => {
     setFocusedPendingReportId(reportId);
-    setActiveTab('map');
+    handleTabChange('map');
   };
 
   const handleSaveUserProfile = (profile: UserProfile) => {
@@ -206,6 +217,7 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
     clearPendingReports();
     clearUserProfile();
     walkController.resetSession();
+    emergencyController.stopEmergencyMode();
 
     setPendingReports([]);
     setUserProfile(null);
@@ -232,6 +244,16 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
   const walkPosition = useMemo<LatLngTuple | null>(
     () => walkLatitude !== undefined && walkLongitude !== undefined ? [walkLatitude, walkLongitude] : null,
     [walkLatitude, walkLongitude]
+  );
+  const emergencyLatitude = emergencyController.location.latestPosition?.latitude;
+  const emergencyLongitude = emergencyController.location.latestPosition?.longitude;
+  const emergencyPosition = useMemo<LatLngTuple | null>(
+    () => emergencyController.location.isTracking
+      && emergencyLatitude !== undefined
+      && emergencyLongitude !== undefined
+      ? [emergencyLatitude, emergencyLongitude]
+      : null,
+    [emergencyController.location.isTracking, emergencyLatitude, emergencyLongitude]
   );
   const overviewPosition = walkController.isActiveOnMap && walkPosition
     ? walkPosition
@@ -272,10 +294,12 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
                 nearbyCounts={homeNearbyCounts}
                 pendingReports={pendingReports}
                 walkController={walkController}
+                emergencyLocationActive={emergencyController.location.isTracking}
+                onOpenEmergencyToolkit={handleOpenEmergencyToolkit}
                 onOpenQuickSafetyCheck={() => setIsQuickSafetyCheckOpen(true)}
                 onViewSafetyMap={handleOpenSafetyMap}
-                onReportIncident={() => setActiveTab('report')}
-                onOpenWalkWithMe={() => setActiveTab('walk')}
+                onReportIncident={() => handleTabChange('report')}
+                onOpenWalkWithMe={() => handleTabChange('walk')}
                 onViewPendingReport={handleViewPendingReport}
               />
             </>
@@ -288,10 +312,13 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
               focusedPendingReportId={focusedPendingReportId}
               walkWithMeActive={walkController.isActiveOnMap}
               journeyPosition={walkController.isActiveOnMap ? walkPosition : null}
+              emergencyLocationActive={emergencyController.location.isTracking}
+              emergencyPosition={emergencyPosition}
               currentPosition={currentLocation.position}
               locationStatus={currentLocation.status}
               onFocusedPendingReportClose={() => setFocusedPendingReportId(null)}
               onNavigateToReport={() => handleTabChange('report')}
+              onOpenEmergencyToolkit={handleOpenEmergencyToolkit}
             />
           )}
 
@@ -364,6 +391,7 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
                 phone: userProfile?.trustedContactPhone ?? '',
               }}
               onViewSafetyMap={handleOpenSafetyMap}
+              onOpenEmergencyToolkit={handleOpenEmergencyToolkit}
             />
           )}
 
@@ -388,6 +416,24 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
             locationStatus={currentLocation.status}
             summary={quickSafetySummary}
             onClose={() => setIsQuickSafetyCheckOpen(false)}
+            onViewSafetyMap={handleOpenSafetyMap}
+          />
+        )}
+
+        {emergencyController.isOpen && (
+          <EmergencyToolkit
+            controller={emergencyController}
+            trustedContactName={userProfile?.trustedContactName ?? ''}
+            maskedTrustedContactNumber={maskPhoneNumber(userProfile?.trustedContactPhone)}
+            hasTrustedContactPhone={Boolean(normalizeDialablePhoneNumber(userProfile?.trustedContactPhone ?? ''))}
+            onConfirmTrustedContactCall={() => {
+              const phone = userProfile?.trustedContactPhone;
+              if (!phone) {
+                emergencyController.cancelConfirmation();
+                return;
+              }
+              emergencyController.confirmTrustedContactCall(phone);
+            }}
             onViewSafetyMap={handleOpenSafetyMap}
           />
         )}

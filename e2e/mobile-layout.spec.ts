@@ -68,6 +68,27 @@ test('mobile shell and critical map controls fit without horizontal overflow', a
   await page.keyboard.press('Escape');
   await expect(quickSafetyDialog).toHaveCount(0);
 
+  const emergencyAction = page.getByRole('button', { name: /Emergency Toolkit/ });
+  const homeActions = page.locator('.home-action-grid .home-action');
+  await expect(homeActions).toHaveCount(5);
+  for (let index = 0; index < await homeActions.count(); index += 1) {
+    await homeActions.nth(index).scrollIntoViewIfNeeded();
+    await expect(homeActions.nth(index)).toBeVisible();
+    expect(await isWithinViewport(homeActions.nth(index))).toBe(true);
+  }
+  await emergencyAction.scrollIntoViewIfNeeded();
+  await expect(emergencyAction).toBeVisible();
+  expect(await isWithinViewport(emergencyAction)).toBe(true);
+  await emergencyAction.click();
+  let emergencyDialog = page.getByRole('dialog', { name: 'Emergency Toolkit' });
+  await expect(emergencyDialog).toBeVisible();
+  await expect(emergencyDialog.getByRole('button', { name: /Call 112/ })).toBeVisible();
+  await expect.poll(() => isWithinViewport(emergencyDialog.locator('.emergency-toolkit-sheet'))).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await emergencyDialog.getByRole('button', { name: 'Stop Emergency Mode' }).scrollIntoViewIfNeeded();
+  await expect(emergencyDialog.getByRole('button', { name: 'Stop Emergency Mode' })).toBeVisible();
+  await emergencyDialog.getByRole('button', { name: 'Close Emergency Toolkit' }).click();
+
   await page.locator('.mobile-nav').getByRole('button', { name: 'Profile', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Your Profile' })).toBeVisible();
   await expect(page.getByText('Location access denied', { exact: true })).toBeVisible();
@@ -100,6 +121,13 @@ test('mobile shell and critical map controls fit without horizontal overflow', a
   await expect.poll(() => isWithinViewport(quickSafetyDialog.locator('.quick-safety-sheet'))).toBe(true);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await quickSafetyDialog.getByRole('button', { name: 'Close', exact: true }).click();
+  await page.getByRole('button', { name: /Emergency Toolkit/ }).click();
+  emergencyDialog = page.getByRole('dialog', { name: 'Emergency Toolkit' });
+  await expect(emergencyDialog).toBeVisible();
+  await expect(emergencyDialog).toHaveCSS('background-color', /rgb/);
+  await expect.poll(() => isWithinViewport(emergencyDialog.locator('.emergency-toolkit-sheet'))).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await emergencyDialog.getByRole('button', { name: 'Close Emergency Toolkit' }).click();
   await page.locator('.mobile-nav').getByRole('button', { name: 'Profile', exact: true }).click();
 
   const resetButton = page.getByRole('button', { name: 'Reset Demo Data' });
