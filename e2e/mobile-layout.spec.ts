@@ -59,6 +59,15 @@ test('mobile shell and critical map controls fit without horizontal overflow', a
   await expect(page.locator('.mobile-nav')).toBeVisible();
   expect(await isWithinViewport(page.locator('.mobile-nav'))).toBe(true);
 
+  await page.getByRole('button', { name: /Check my surroundings/ }).click();
+  let quickSafetyDialog = page.getByRole('dialog', { name: 'Around you' });
+  await expect(quickSafetyDialog).toBeVisible();
+  await expect(quickSafetyDialog).toContainText('Location is needed to check signals around you.');
+  await expect.poll(() => isWithinViewport(quickSafetyDialog.locator('.quick-safety-sheet'))).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await page.keyboard.press('Escape');
+  await expect(quickSafetyDialog).toHaveCount(0);
+
   await page.locator('.mobile-nav').getByRole('button', { name: 'Profile', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Your Profile' })).toBeVisible();
   await expect(page.getByText('Location access denied', { exact: true })).toBeVisible();
@@ -83,6 +92,15 @@ test('mobile shell and critical map controls fit without horizontal overflow', a
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   expect(await page.locator('.app-body').evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+
+  await page.locator('.mobile-nav').getByRole('button', { name: 'Home', exact: true }).click();
+  await page.getByRole('button', { name: /Check my surroundings/ }).click();
+  quickSafetyDialog = page.getByRole('dialog', { name: 'Around you' });
+  await expect(quickSafetyDialog).toBeVisible();
+  await expect.poll(() => isWithinViewport(quickSafetyDialog.locator('.quick-safety-sheet'))).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await quickSafetyDialog.getByRole('button', { name: 'Close', exact: true }).click();
+  await page.locator('.mobile-nav').getByRole('button', { name: 'Profile', exact: true }).click();
 
   const resetButton = page.getByRole('button', { name: 'Reset Demo Data' });
   await resetButton.scrollIntoViewIfNeeded();

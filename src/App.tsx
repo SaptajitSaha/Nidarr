@@ -9,6 +9,7 @@ import { WalkWithMe } from './components/WalkWithMe';
 import { Profile } from './components/Profile';
 import { MobileNavigation } from './components/MobileNavigation';
 import { LocationConfirmationSheet } from './components/LocationConfirmationSheet';
+import { QuickSafetyCheckSheet } from './components/QuickSafetyCheckSheet';
 import type { NavTab } from './components/MobileNavigation';
 import type { IncidentFormData, AnalysisResult } from './types/incident';
 import type { PendingCommunitySignal } from './types/pendingReport';
@@ -17,7 +18,7 @@ import { analyseIncidentReport } from './services/api';
 import { useWalkSession } from './hooks/useWalkSession';
 import { useCurrentLocation } from './hooks/useCurrentLocation';
 import { useAppearance } from './hooks/useAppearance';
-import { countNearbySafetySignals } from './utils/safetySignalCounts';
+import { countNearbySafetySignals, summarizeNearbySafetySignals } from './utils/safetySignalCounts';
 import {
   createPendingReportId,
   clearPendingReports,
@@ -44,6 +45,7 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [pendingReports, setPendingReports] = useState<PendingCommunitySignal[]>(() => loadPendingReports());
   const [userProfile, setUserProfile] = useState<UserProfile | null>(() => loadUserProfile());
+  const [isQuickSafetyCheckOpen, setIsQuickSafetyCheckOpen] = useState(false);
   const [isLocationConfirmationOpen, setIsLocationConfirmationOpen] = useState(false);
   const [isSavingPendingReport, setIsSavingPendingReport] = useState(false);
   const [pendingSaveError, setPendingSaveError] = useState<string | null>(null);
@@ -109,6 +111,7 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
   };
 
   const handleTabChange = (tab: NavTab) => {
+    setIsQuickSafetyCheckOpen(false);
     setActiveTab(tab);
   };
 
@@ -177,6 +180,7 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
   };
 
   const handleOpenSafetyMap = () => {
+    setIsQuickSafetyCheckOpen(false);
     setFocusedPendingReportId(null);
     setActiveTab('map');
   };
@@ -209,6 +213,7 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
     setAnalysisResult(null);
     setSubmittedReport(null);
     setErrorMessage(null);
+    setIsQuickSafetyCheckOpen(false);
     setIsLocationConfirmationOpen(false);
     setIsSavingPendingReport(false);
     setPendingSaveError(null);
@@ -236,6 +241,12 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
     () => overviewPosition ? countNearbySafetySignals(overviewPosition, pendingReports) : null,
     [overviewPosition, pendingReports]
   );
+  const quickSafetySummary = useMemo(
+    () => currentLocation.position
+      ? summarizeNearbySafetySignals(currentLocation.position, pendingReports)
+      : null,
+    [currentLocation.position, pendingReports]
+  );
 
   return (
     <div className="mobile-view-wrapper">
@@ -261,6 +272,7 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
                 nearbyCounts={homeNearbyCounts}
                 pendingReports={pendingReports}
                 walkController={walkController}
+                onOpenQuickSafetyCheck={() => setIsQuickSafetyCheckOpen(true)}
                 onViewSafetyMap={handleOpenSafetyMap}
                 onReportIncident={() => setActiveTab('report')}
                 onOpenWalkWithMe={() => setActiveTab('walk')}
@@ -370,6 +382,15 @@ export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
             />
           )}
         </main>
+
+        {isQuickSafetyCheckOpen && (
+          <QuickSafetyCheckSheet
+            locationStatus={currentLocation.status}
+            summary={quickSafetySummary}
+            onClose={() => setIsQuickSafetyCheckOpen(false)}
+            onViewSafetyMap={handleOpenSafetyMap}
+          />
+        )}
 
         {isLocationConfirmationOpen && (
           <LocationConfirmationSheet

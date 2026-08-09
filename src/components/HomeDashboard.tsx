@@ -19,6 +19,7 @@ interface HomeDashboardProps {
   nearbyCounts: NearbySignalCounts | null;
   pendingReports: PendingCommunitySignal[];
   walkController: WalkSessionController;
+  onOpenQuickSafetyCheck: () => void;
   onViewSafetyMap: () => void;
   onReportIncident: () => void;
   onOpenWalkWithMe: () => void;
@@ -71,6 +72,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   nearbyCounts,
   pendingReports,
   walkController,
+  onOpenQuickSafetyCheck,
   onViewSafetyMap,
   onReportIncident,
   onOpenWalkWithMe,
@@ -140,6 +142,13 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       <section className="home-quick-actions" aria-labelledby="home-actions-title">
         <div className="home-section-title-row"><h3 id="home-actions-title">Quick actions</h3></div>
         <div className="home-action-grid">
+          <button type="button" className="home-action home-action--quick-check" onClick={onOpenQuickSafetyCheck}>
+            <span className="home-action-icon"><ShieldCheck size={22} /></span>
+            <span>
+              <strong>Check my surroundings</strong>
+              <small>Get a quick overview of safety signals near your current location.</small>
+            </span>
+          </button>
           <button type="button" className="home-action home-action--map" onClick={onViewSafetyMap}>
             <span className="home-action-icon"><MapPinned size={22} /></span>
             <span><strong>View Safety Map</strong><small>See demonstration and pending signals</small></span>
