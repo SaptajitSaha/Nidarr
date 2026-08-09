@@ -125,7 +125,7 @@ test('starts, restores, demonstrates check-in, and completes safely with one wat
   await page.locator('.mobile-nav').getByRole('button', { name: 'Walk With Me', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Walk With Me Active' })).toBeVisible();
 
-  await expect(page.getByText('Prototype demo control')).toBeVisible();
+  await expect(page.getByText('Demo control')).toBeVisible();
   await page.getByRole('button', { name: 'Trigger check-in' }).click();
   await expect(page.getByRole('heading', { name: 'Have you arrived safely?' })).toBeVisible();
   await page.getByRole('button', { name: "I'M SAFE" }).click();
@@ -162,18 +162,18 @@ test('geolocation denial permits limited mode and help requires confirmation', a
   await openWalkWithMe(page);
   await startWalk(page);
 
-  await expect(page.getByText(/Location permission denied — continuing in limited\/demo mode/)).toBeVisible();
+  await expect(page.getByText(/Location permission denied — continuing in limited mode/)).toBeVisible();
   await expect.poll(async () => (await geolocationState(page)).watchCalls).toBe(0);
 
   await page.getByRole('button', { name: 'Need Help', exact: true }).click();
-  const confirmation = page.getByRole('dialog', { name: 'Request prototype help?' });
+  const confirmation = page.getByRole('dialog', { name: 'Request simulated help?' });
   await expect(confirmation).toBeVisible();
   await expect(confirmation).toContainText('No message, phone call, notification, police alert, or emergency-service request will be sent.');
   await expect(page.locator('a[href^="tel:"], a[href^="sms:"], a[href*="whatsapp"], a[href*="wa.me"]')).toHaveCount(0);
 
   await confirmation.getByRole('button', { name: 'Confirm Need Help' }).click();
   await expect(page.getByRole('heading', { name: 'Help requested' })).toBeVisible();
-  await expect(page.getByText('Prototype: your trusted contact would be alerted here.')).toBeVisible();
+  await expect(page.getByText('Simulated status only — no trusted-contact alert was sent.')).toBeVisible();
   await expect(page.getByText('No current location is available to share.')).toBeVisible();
 
   await page.getByRole('button', { name: 'End Session' }).click();

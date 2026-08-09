@@ -126,7 +126,7 @@ test('reset confirmation preserves on cancel and clears only Nidarr prototype st
   await expect(page.getByText('Report added as a pending community signal.')).toBeVisible();
 
   await page.locator('.mobile-nav').getByRole('button', { name: 'Profile', exact: true }).click();
-  await expect(page.getByText('Prototype controls')).toBeVisible();
+  await expect(page.getByText('Demo controls')).toBeVisible();
   await page.locator('#profile-display-name').fill('Saptajit');
   await page.locator('#profile-contact-name').fill('Ananya');
   await page.locator('#profile-contact-phone').fill('9876543210');
@@ -134,7 +134,7 @@ test('reset confirmation preserves on cancel and clears only Nidarr prototype st
   await expect.poll(async () => page.evaluate((key) => localStorage.getItem(key), USER_PROFILE_STORAGE_KEY)).not.toBeNull();
   await page.getByRole('button', { name: 'Reset Demo Data' }).click();
 
-  const dialog = page.getByRole('dialog', { name: 'Reset Nidarr prototype?' });
+  const dialog = page.getByRole('dialog', { name: 'Reset demo data?' });
   await expect(dialog).toBeVisible();
   await expect(dialog).toContainText('Delete locally stored pending community reports');
   await expect(dialog).toContainText('End and remove the current Walk With Me session');
@@ -150,11 +150,11 @@ test('reset confirmation preserves on cancel and clears only Nidarr prototype st
   expect(await page.evaluate((key) => localStorage.getItem(key), UNRELATED_STORAGE_KEY)).toBe('keep-me');
 
   await page.getByRole('button', { name: 'Reset Demo Data' }).click();
-  await page.getByRole('dialog', { name: 'Reset Nidarr prototype?' })
-    .getByRole('button', { name: 'Reset Prototype' }).click();
+  await page.getByRole('dialog', { name: 'Reset demo data?' })
+    .getByRole('button', { name: 'Reset Demo Data' }).click();
 
   await expect(page.getByRole('heading', { name: 'Your safety tools, in one place.' })).toBeVisible();
-  const successNotice = page.getByText('Prototype reset successfully.');
+  const successNotice = page.getByText('Demo data reset successfully.');
   await expect(successNotice).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.locator('.location-confirmation-overlay, .details-sheet, .map-save-success')).toHaveCount(0);

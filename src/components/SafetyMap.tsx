@@ -143,7 +143,7 @@ export const SafetyMap: React.FC<SafetyMapProps> = ({
       <div className="map-status-stack">
         <div className="map-prototype-chip">
           <FileWarning size={13} />
-          <span>Prototype map — demo and unverified community data</span>
+          <span>Demonstration and unverified community data</span>
         </div>
 
         {walkWithMeActive && (

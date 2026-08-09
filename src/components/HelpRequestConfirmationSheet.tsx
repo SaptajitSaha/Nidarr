@@ -18,7 +18,7 @@ export const HelpRequestConfirmationSheet: React.FC<HelpRequestConfirmationSheet
           <X size={20} />
         </button>
       </div>
-      <h2 id="walk-help-title">Request prototype help?</h2>
+      <h2 id="walk-help-title">Request simulated help?</h2>
       <p>
         This changes the session status for demonstration only. No message, phone call, notification,
         police alert, or emergency-service request will be sent.

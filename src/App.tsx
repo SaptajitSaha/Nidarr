@@ -245,7 +245,7 @@ export const App: React.FC = () => {
               {prototypeResetNoticeId > 0 && (
                 <div className="prototype-reset-success animate-fade-in" role="status" aria-live="polite">
                   <CheckCircle2 size={17} />
-                  <span>Prototype reset successfully.</span>
+                  <span>Demo data reset successfully.</span>
                 </div>
               )}
               <HomeDashboard

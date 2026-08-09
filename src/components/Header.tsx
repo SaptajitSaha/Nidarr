@@ -9,9 +9,7 @@ export const Header: React.FC = () => {
           <img src="/nidarr-logo.jpg" alt="Nidarr Safety Logo" className="brand-logo-img" />
         </div>
         <div className="brand-text">
-          <h1 className="brand-title">
-            Nidarr <span className="brand-badge">PROTOTYPE</span>
-          </h1>
+          <h1 className="brand-title">Nidarr</h1>
           <span className="brand-tagline">Personal Safety Network</span>
         </div>
       </div>

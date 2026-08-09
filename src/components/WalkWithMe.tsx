@@ -55,8 +55,8 @@ const maskPhoneNumber = (phone?: string) => {
 const locationMessage = (availability: WalkLocationAvailability) => {
   switch (availability) {
     case 'available': return 'Current location available in this foreground session.';
-    case 'denied': return 'Location permission denied — continuing in limited/demo mode.';
-    case 'unsupported': return 'Location is unsupported — continuing in limited/demo mode.';
+    case 'denied': return 'Location permission denied — continuing in limited mode.';
+    case 'unsupported': return 'Location is unsupported — continuing in limited mode.';
     case 'unavailable': return 'Location is temporarily unavailable — the session remains active.';
     case 'requesting': return 'Requesting browser location…';
     default: return 'Waiting for a location update.';
@@ -110,12 +110,12 @@ export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, defaultTrust
       <section className="walk-screen walk-setup-screen" aria-labelledby="walk-setup-title">
         <div className="screen-title-container">
           <h2 className="screen-title" id="walk-setup-title">Walk With Me</h2>
-          <p className="screen-subtitle">Start a foreground-only prototype safety check-in for your journey.</p>
+          <p className="screen-subtitle">Start a foreground-only safety check-in for your journey.</p>
         </div>
 
         <div className="walk-prototype-notice">
           <ShieldCheck size={18} />
-          <span>Prototype only — trusted-contact alerts and emergency integrations are simulated.</span>
+          <span>Trusted-contact alerts and emergency integrations are simulated. No real alert is sent.</span>
         </div>
 
         <form className="walk-setup-form" onSubmit={handleStart}>
@@ -165,7 +165,7 @@ export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, defaultTrust
           <div className="walk-contact-section">
             <div className="walk-contact-heading">
               <UserRound size={17} />
-              <div><strong>Trusted contact</strong><span>Prototype/simulated</span></div>
+              <div><strong>Trusted contact</strong><span>Simulated alerts</span></div>
             </div>
             <div className="form-group">
               <label className="form-label" htmlFor="walk-contact-name">Contact name</label>
@@ -187,7 +187,7 @@ export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, defaultTrust
                 value={contactPhone}
                 onChange={(event) => setContactPhone(event.target.value)}
                 maxLength={USER_PROFILE_FIELD_LIMITS.trustedContactPhone}
-                placeholder="For prototype display only"
+                placeholder="Optional contact number"
                 autoComplete="off"
               />
             </div>
@@ -204,7 +204,7 @@ export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, defaultTrust
   }
 
   const { session } = controller;
-  const contactNameDisplay = session.trustedContact.name || 'Not provided (prototype)';
+  const contactNameDisplay = session.trustedContact.name || 'Not provided';
   const latestCoordinates = session.latestCoordinates ?? session.startingCoordinates;
 
   if (session.status === 'COMPLETED_SAFE') {
@@ -212,7 +212,7 @@ export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, defaultTrust
       <section className="walk-screen walk-terminal-state walk-terminal-state--safe">
         <div className="walk-terminal-icon"><CheckCircle2 size={42} /></div>
         <h2>Walk completed</h2>
-        <p>Your prototype session is marked completed safely.</p>
+        <p>Your Walk With Me session is marked completed safely.</p>
         <div className="walk-terminal-summary"><strong>{session.destination}</strong><span>Completed at {formatTime(session.completedAt ?? new Date().toISOString())}</span></div>
         <button type="button" className="btn btn-primary btn-full" onClick={handleStartAnotherSession}>Start another session</button>
       </section>
@@ -235,7 +235,7 @@ export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, defaultTrust
       <section className="walk-screen walk-help-state">
         <div className="walk-help-state-icon"><AlertTriangle size={34} /></div>
         <h2>Help requested</h2>
-        <p className="walk-help-prototype-copy">Prototype: your trusted contact would be alerted here.</p>
+        <p className="walk-help-prototype-copy">Simulated status only — no trusted-contact alert was sent.</p>
         <div className="walk-help-location-copy">
           <Navigation size={17} />
           <span>{latestCoordinates ? 'Your current location would be shared.' : 'No current location is available to share.'}</span>
@@ -298,7 +298,7 @@ export const WalkWithMe: React.FC<WalkWithMeProps> = ({ controller, defaultTrust
 
       {session.status === 'ACTIVE' && (
         <div className="walk-demo-control">
-          <span>Prototype demo control</span>
+          <span>Demo control</span>
           <button type="button" onClick={controller.triggerDemoCheckIn}>Trigger check-in</button>
         </div>
       )}

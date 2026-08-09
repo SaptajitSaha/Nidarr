@@ -79,7 +79,7 @@ test('mobile shell and critical map controls fit without horizontal overflow', a
   await expect(resetButton).toBeVisible();
   expect(await isWithinViewport(resetButton)).toBe(true);
   await resetButton.click();
-  const resetDialog = page.getByRole('dialog', { name: 'Reset Nidarr prototype?' });
+  const resetDialog = page.getByRole('dialog', { name: 'Reset demo data?' });
   await expect(resetDialog).toBeVisible();
   await expect.poll(() => isWithinViewport(resetDialog)).toBe(true);
   await resetDialog.getByRole('button', { name: 'Cancel' }).click();

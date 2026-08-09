@@ -35,7 +35,7 @@ const EMPTY_PROFILE: UserProfile = {
 const locationStatusCopy = (status: CurrentLocationStatus) => {
   switch (status) {
     case 'requesting': return { label: 'Checking location', detail: 'Nidarr is waiting for the browser location result already requested by the app.' };
-    case 'available': return { label: 'Location available', detail: 'A current browser location is available to Nidarr for nearby prototype features.' };
+    case 'available': return { label: 'Location available', detail: 'A current browser location is available to Nidarr for nearby signal counts.' };
     case 'denied': return { label: 'Location access denied', detail: 'The browser denied location access. Profile will not request it again.' };
     case 'unsupported': return { label: 'Location unavailable', detail: 'This browser does not support the location feature used by Nidarr.' };
     default: return { label: 'Location unavailable', detail: 'A current browser location is not available. Profile will not request it again.' };
@@ -101,7 +101,7 @@ export const Profile: React.FC<ProfileProps> = ({
       <div className="screen-title-container profile-title-container">
         <span className="profile-eyebrow">Stored on this device</span>
         <h2 className="screen-title" id="profile-title">Your Profile</h2>
-        <p className="screen-subtitle">Keep lightweight details ready for Nidarr's prototype safety tools.</p>
+        <p className="screen-subtitle">Keep lightweight details ready for Nidarr's safety tools.</p>
       </div>
 
       <form className="profile-form" onSubmit={handleSave}>
@@ -172,13 +172,13 @@ export const Profile: React.FC<ProfileProps> = ({
               onChange={(event) => updateDraft('trustedContactPhone', event.target.value)}
               maxLength={USER_PROFILE_FIELD_LIMITS.trustedContactPhone}
               autoComplete="off"
-              placeholder="For prototype display only"
+              placeholder="Optional contact number"
             />
           </div>
 
           <div className="profile-simulation-notice">
             <ShieldCheck size={16} />
-            <span>Prototype only — trusted-contact alerts, calls, and messages are simulated and are not sent.</span>
+            <span>Trusted-contact alerts, calls, and messages are simulated and are not sent.</span>
           </div>
         </section>
 
@@ -213,14 +213,14 @@ export const Profile: React.FC<ProfileProps> = ({
       <section className="profile-card profile-information-card" aria-labelledby="profile-about-title">
         <div className="profile-section-heading">
           <Info size={18} />
-          <div><h3 id="profile-about-title">About Nidarr</h3><span>Hackathon prototype</span></div>
+          <div><h3 id="profile-about-title">About Nidarr</h3><span>Current release</span></div>
         </div>
-        <p className="profile-section-copy">Nidarr brings together prototype incident analysis, clearly labelled safety signals, and foreground journey check-ins. It is not a production safety or emergency service.</p>
+        <p className="profile-section-copy">Nidarr brings together incident analysis, clearly labelled safety signals, and foreground journey check-ins. It does not contact emergency services.</p>
       </section>
 
       <section className="prototype-controls" aria-labelledby="prototype-controls-title">
         <div className="prototype-controls-copy">
-          <span id="prototype-controls-title">Prototype controls</span>
+          <span id="prototype-controls-title">Demo controls</span>
           <small>Developer and demo presenter tools</small>
         </div>
         <button type="button" className="prototype-reset-button" onClick={() => setIsResetConfirmationOpen(true)}>
@@ -243,18 +243,18 @@ export const Profile: React.FC<ProfileProps> = ({
                 <X size={17} />
               </button>
             </div>
-            <h2 id="prototype-reset-title">Reset Nidarr prototype?</h2>
-            <p id="prototype-reset-description">This will restore locally stored prototype data to a clean demonstration state.</p>
+            <h2 id="prototype-reset-title">Reset demo data?</h2>
+            <p id="prototype-reset-description">This will remove locally stored Nidarr data and return the app to a clean demo state.</p>
             <ul>
               <li>Delete locally stored pending community reports</li>
               <li>End and remove the current Walk With Me session</li>
               <li>Delete the profile saved on this device</li>
-              <li>Clear other Nidarr-specific transient prototype state</li>
+              <li>Clear other Nidarr-specific temporary demo state</li>
             </ul>
             <p className="prototype-reset-preserved">Seeded demonstration safety signals and browser permission state will not be affected.</p>
             <div className="prototype-reset-actions">
               <button type="button" className="btn btn-secondary" onClick={() => setIsResetConfirmationOpen(false)}>Cancel</button>
-              <button type="button" className="btn prototype-reset-confirm" onClick={handleConfirmReset}>Reset Prototype</button>
+              <button type="button" className="btn prototype-reset-confirm" onClick={handleConfirmReset}>Reset Demo Data</button>
             </div>
           </section>
         </div>

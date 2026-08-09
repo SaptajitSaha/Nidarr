@@ -90,7 +90,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   const walkStatusText = activeWalk?.status === 'CHECK_IN_REQUIRED'
     ? 'Check-in required'
     : activeWalk?.status === 'HELP_REQUESTED'
-      ? 'Help requested — prototype status only'
+      ? 'Help requested — simulated status only'
       : formatRemaining(walkController.remainingMs);
   const trimmedDisplayName = displayName.trim();
   const homeHeading = trimmedDisplayName
@@ -100,9 +100,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   return (
     <div className="home-dashboard animate-fade-in">
       <section className="home-greeting" aria-labelledby="home-title">
-        <span className="home-eyebrow">Nidarr prototype</span>
+        <span className="home-eyebrow">Nidarr</span>
         <h2 id="home-title">{homeHeading}</h2>
-        <p>Review nearby prototype signals or quickly open a safety feature.</p>
+        <p>Review nearby safety signals or quickly open a safety feature.</p>
       </section>
 
       <section className="home-overview" aria-labelledby="home-overview-title">
@@ -142,7 +142,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         <div className="home-action-grid">
           <button type="button" className="home-action home-action--map" onClick={onViewSafetyMap}>
             <span className="home-action-icon"><MapPinned size={22} /></span>
-            <span><strong>View Safety Map</strong><small>See demo and pending signals</small></span>
+            <span><strong>View Safety Map</strong><small>See demonstration and pending signals</small></span>
           </button>
           <button type="button" className="home-action" onClick={onReportIncident}>
             <span className="home-action-icon"><PlusCircle size={21} /></span>
@@ -150,7 +150,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           </button>
           <button type="button" className="home-action" onClick={onOpenWalkWithMe}>
             <span className="home-action-icon"><Footprints size={21} /></span>
-            <span><strong>{activeWalk ? 'Resume Walk With Me' : 'Start Walk With Me'}</strong><small>{activeWalk ? 'Resume the current session' : 'Start a prototype check-in'}</small></span>
+            <span><strong>{activeWalk ? 'Resume Walk With Me' : 'Start Walk With Me'}</strong><small>{activeWalk ? 'Resume the current session' : 'Start a journey check-in'}</small></span>
           </button>
         </div>
       </section>
