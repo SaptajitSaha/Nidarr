@@ -1,7 +1,5 @@
 export const GEMINI_MODEL = 'gemini-3-flash-preview';
 
-export const PORT = process.env.PORT || 3001;
-
 export const ALLOWED_CATEGORIES = [
   'Harassment',
   'Stalking',

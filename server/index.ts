@@ -1,20 +1,24 @@
+import 'dotenv/config';
+import { existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express, { Request, Response } from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import { PORT } from './config.js';
 import { analyseIncidentWithGemini } from './gemini.js';
 
-// Load environment variables from .env file
-dotenv.config();
-
 const app = express();
+const configuredPort = Number.parseInt(process.env.PORT ?? '', 10);
+const port = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3001;
+const host = '0.0.0.0';
+const compiledServerDirectory = dirname(fileURLToPath(import.meta.url));
+const frontendDistDirectory = resolve(compiledServerDirectory, '..', 'dist');
+const frontendIndexPath = resolve(frontendDistDirectory, 'index.html');
 
-app.use(cors());
+// API-first middleware order: parsing and API routes always precede frontend serving.
 app.use(express.json());
 
 // Health check endpoint
 app.get('/api/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok', server: 'Nidarr Backend' });
+  res.json({ status: 'ok' });
 });
 
 // Incident Analysis Endpoint
@@ -51,6 +55,36 @@ app.post('/api/analyse', async (req: Request, res: Response) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Nidarr backend server running on http://localhost:${PORT}`);
+// API requests never fall through to the frontend SPA.
+app.use('/api', (_req: Request, res: Response) => {
+  res.status(404).json({ error: 'API route not found.' });
+});
+
+// The path is derived from this file, so production start does not depend on cwd.
+app.use(express.static(frontendDistDirectory));
+
+// Only browser GET navigation receives the SPA shell.
+app.use((req: Request, res: Response, next) => {
+  if (req.method !== 'GET') {
+    next();
+    return;
+  }
+
+  if (!existsSync(frontendIndexPath)) {
+    res.status(500).json({
+      error: 'The built frontend is unavailable. Run npm run build before starting the server.',
+    });
+    return;
+  }
+
+  res.sendFile(frontendIndexPath);
+});
+
+// Non-GET, non-API requests that remain unmatched receive a normal 404.
+app.use((_req: Request, res: Response) => {
+  res.status(404).json({ error: 'Route not found.' });
+});
+
+app.listen(port, host, () => {
+  console.log(`Nidarr server listening on ${host}:${port}`);
 });

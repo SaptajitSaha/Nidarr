@@ -6,9 +6,12 @@
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": true,
+    "noEmit": false,
+    "rootDir": "server",
+    "outDir": "server-dist",
     "forceConsistentCasingInFileNames": true,
     "types": ["node"]
   },
-  "include": ["server/**/*"]
+  "include": ["server/**/*"],
+  "exclude": ["server-dist"]
 }

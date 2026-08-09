@@ -231,7 +231,8 @@ npm run dev
 | `npm run server` | Start the Express backend in watch mode |
 | `npm run dev:all` | Start frontend and backend together |
 | `npm run build` | Type-check and build the frontend |
-| `npm run build:server` | Type-check the backend |
+| `npm run build:server` | Compile the backend into `server-dist/` |
+| `npm run start` | Start the compiled Express production server |
 | `npm run lint` | Run Oxlint |
 | `npm run preview` | Preview the production frontend build |
 | `npm run test:e2e` | Run all Playwright tests in Chromium |
@@ -240,6 +241,19 @@ npm run dev
 | `npm run test:e2e:install` | Install Playwright Chromium |
 
 </details>
+
+## Deploy on Render
+
+Create one **Web Service** from the repository root with these dashboard settings:
+
+| Field | Value |
+| --- | --- |
+| Runtime | Node |
+| Build command | `npm ci && npm run build && npm run build:server` |
+| Start command | `npm run start` |
+| Health check path | `/api/health` |
+
+Add `GEMINI_API_KEY` as a secret environment variable in Render. The frontend and API share one origin, so no frontend API URL variable is required. Never commit `.env` or any Gemini key.
 
 ## Testing
 
