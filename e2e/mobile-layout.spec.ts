@@ -47,6 +47,7 @@ const overlaps = (first: { x: number; y: number; width: number; height: number }
 test('mobile shell and critical map controls fit without horizontal overflow', async ({ page }) => {
   await prepareMobilePage(page);
   await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
   const viewportWidth = await page.evaluate(() => window.innerWidth);
   const containerBox = await page.locator('.mobile-container').boundingBox();
@@ -61,6 +62,10 @@ test('mobile shell and critical map controls fit without horizontal overflow', a
   await page.locator('.mobile-nav').getByRole('button', { name: 'Profile', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Your Profile' })).toBeVisible();
   await expect(page.getByText('Location access denied', { exact: true })).toBeVisible();
+  await expect(page.getByRole('radiogroup', { name: 'Appearance' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'System', exact: true })).toBeChecked();
+  await expect(page.locator('label[for="appearance-light"]')).toBeVisible();
+  await expect(page.locator('label[for="appearance-dark"]')).toBeVisible();
   await expect(page.locator('#profile-display-name')).toHaveAttribute('maxlength', '60');
   await expect(page.locator('#profile-contact-name')).toHaveAttribute('maxlength', '80');
   await expect(page.locator('#profile-contact-phone')).toHaveAttribute('maxlength', '30');
@@ -71,6 +76,11 @@ test('mobile shell and critical map controls fit without horizontal overflow', a
   await page.locator('#profile-home-area').fill('A plain-text home area description that wraps without becoming a map position');
   await page.getByRole('button', { name: 'Save Profile' }).click();
   await expect(page.getByText('Profile saved on this device.')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  expect(await page.locator('.app-body').evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+
+  await page.locator('label[for="appearance-dark"]').click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   expect(await page.locator('.app-body').evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
 

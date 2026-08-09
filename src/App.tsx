@@ -16,6 +16,7 @@ import type { UserProfile } from './types/userProfile';
 import { analyseIncidentReport } from './services/api';
 import { useWalkSession } from './hooks/useWalkSession';
 import { useCurrentLocation } from './hooks/useCurrentLocation';
+import { useAppearance } from './hooks/useAppearance';
 import { countNearbySafetySignals } from './utils/safetySignalCounts';
 import {
   createPendingReportId,
@@ -29,8 +30,13 @@ import {
   saveUserProfile,
 } from './services/userProfileStorage';
 import { AlertTriangle, CheckCircle2, MapPinned, XCircle } from 'lucide-react';
+import type { AppearancePreference } from './types/appearance';
 
-export const App: React.FC = () => {
+interface AppProps {
+  initialAppearancePreference: AppearancePreference;
+}
+
+export const App: React.FC<AppProps> = ({ initialAppearancePreference }) => {
   const [activeTab, setActiveTab] = useState<NavTab>('home');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
@@ -50,6 +56,7 @@ export const App: React.FC = () => {
   const analysisRequestInFlightRef = useRef(false);
   const walkController = useWalkSession();
   const currentLocation = useCurrentLocation();
+  const appearanceController = useAppearance(initialAppearancePreference);
 
   useEffect(() => {
     if (prototypeResetNoticeId === 0) return;
@@ -354,6 +361,10 @@ export const App: React.FC = () => {
               profile={userProfile}
               locationStatus={currentLocation.status}
               pendingReportCount={pendingReports.length}
+              appearancePreference={appearanceController.preference}
+              activeAppearance={appearanceController.resolvedAppearance}
+              appearanceSaveError={appearanceController.saveError}
+              onAppearanceChange={appearanceController.selectAppearance}
               onSaveProfile={handleSaveUserProfile}
               onResetDemoData={handleResetDemoData}
             />

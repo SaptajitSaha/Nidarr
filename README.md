@@ -161,7 +161,7 @@ The browser owns presentation, geolocation, map interaction, and prototype state
 - The Gemini key remains server-side and is read only from `process.env.GEMINI_API_KEY`.
 - `.env` is ignored by Git; `.env.example` contains a placeholder only.
 - The frontend calls `/api/analyse` and never receives the Gemini credential.
-- `localStorage` is used only for the local profile, pending reports, and the current Walk With Me session.
+- `localStorage` is used only for the local profile, appearance preference, pending reports, and the current Walk With Me session.
 - Stored prototype data is device-local, unauthenticated, and is not secure or durable storage.
 - Trusted-contact phone numbers are masked in the active-session UI and are not intentionally logged.
 
@@ -257,7 +257,7 @@ The Chromium suite covers:
 - pending-marker persistence and focus cleanup
 - geolocation success and denial
 - Walk With Me restoration, check-in, simulated help, and watcher cleanup
-- profile persistence, personalisation, Walk autofill, malformed-storage recovery, and mobile layouts
+- profile persistence, personalisation, appearance preferences, Walk autofill, malformed-storage recovery, and mobile layouts
 - prototype reset and unrelated-storage preservation
 
 UI-flow tests mock `/api/analyse`; a real Gemini smoke test remains separate and optional.

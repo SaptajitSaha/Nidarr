@@ -2,7 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, useMap } from 'react-leaflet';
 import type { LatLngTuple } from 'leaflet';
 import { DEMO_SAFETY_SIGNALS } from '../data/demoSafetySignals';
-import type { SafetySignal, RiskLevel } from '../data/demoSafetySignals';
+import type { SafetySignal } from '../data/demoSafetySignals';
+import {
+  MARKER_STROKE_COLOR,
+  PENDING_REPORT_COLOR,
+  SAFETY_SIGNAL_COLORS,
+  USER_LOCATION_COLOR,
+} from '../data/safetySignalPalette';
 import type { PendingCommunitySignal } from '../types/pendingReport';
 import type { CurrentLocationStatus } from '../hooks/useCurrentLocation';
 import { countNearbySafetySignals } from '../utils/safetySignalCounts';
@@ -13,15 +19,6 @@ import { Crosshair, FileWarning, Footprints } from 'lucide-react';
 
 const KOLKATA_CENTER: LatLngTuple = [22.5726, 88.3639];
 const DEFAULT_ZOOM = 13;
-
-const RISK_COLORS: Record<RiskLevel, string> = {
-  Low: '#10B981',
-  Moderate: '#F59E0B',
-  Elevated: '#F97316',
-  High: '#EF4444',
-};
-
-const PENDING_REPORT_COLOR = '#7E22CE';
 
 interface SafetyMapProps {
   pendingReports: PendingCommunitySignal[];
@@ -193,9 +190,9 @@ export const SafetyMap: React.FC<SafetyMapProps> = ({
             center={[signal.latitude, signal.longitude]}
             radius={12}
             pathOptions={{
-              fillColor: RISK_COLORS[signal.riskLevel],
+              fillColor: SAFETY_SIGNAL_COLORS[signal.riskLevel],
               fillOpacity: 0.85,
-              color: '#FFFFFF',
+              color: MARKER_STROKE_COLOR,
               weight: 2,
             }}
             eventHandlers={{
@@ -230,7 +227,7 @@ export const SafetyMap: React.FC<SafetyMapProps> = ({
               pathOptions={{
                 fillColor: PENDING_REPORT_COLOR,
                 fillOpacity: 0.9,
-                color: '#FFFFFF',
+                color: MARKER_STROKE_COLOR,
                 weight: 3,
               }}
               eventHandlers={{
@@ -251,9 +248,9 @@ export const SafetyMap: React.FC<SafetyMapProps> = ({
               center={userPosition}
               radius={18}
               pathOptions={{
-                fillColor: '#3B82F6',
+                fillColor: USER_LOCATION_COLOR,
                 fillOpacity: 0.15,
-                color: '#3B82F6',
+                color: USER_LOCATION_COLOR,
                 weight: 1.5,
               }}
             />
@@ -262,9 +259,9 @@ export const SafetyMap: React.FC<SafetyMapProps> = ({
               center={userPosition}
               radius={7}
               pathOptions={{
-                fillColor: '#3B82F6',
+                fillColor: USER_LOCATION_COLOR,
                 fillOpacity: 1,
-                color: '#FFFFFF',
+                color: MARKER_STROKE_COLOR,
                 weight: 2.5,
               }}
             />

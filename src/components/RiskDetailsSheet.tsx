@@ -1,5 +1,5 @@
 import React from 'react';
-import type { SafetySignal, RiskLevel } from '../data/demoSafetySignals';
+import type { SafetySignal } from '../data/demoSafetySignals';
 import { X, AlertTriangle, MapPin, Users, Clock, FlaskConical } from 'lucide-react';
 
 interface RiskDetailsSheetProps {
@@ -7,15 +7,8 @@ interface RiskDetailsSheetProps {
   onClose: () => void;
 }
 
-const RISK_COLORS: Record<RiskLevel, { text: string; bg: string; border: string }> = {
-  Low:      { text: '#065F46', bg: '#ECFDF5', border: '#10B981' },
-  Moderate: { text: '#92400E', bg: '#FFFBEB', border: '#F59E0B' },
-  Elevated: { text: '#9A3412', bg: '#FFF7ED', border: '#F97316' },
-  High:     { text: '#991B1B', bg: '#FEF2F2', border: '#EF4444' },
-};
-
 export const RiskDetailsSheet: React.FC<RiskDetailsSheetProps> = ({ signal, onClose }) => {
-  const colors = RISK_COLORS[signal.riskLevel];
+  const riskClassName = signal.riskLevel.toLowerCase();
 
   return (
     <>
@@ -30,7 +23,7 @@ export const RiskDetailsSheet: React.FC<RiskDetailsSheetProps> = ({ signal, onCl
         {/* Header */}
         <div className="sheet-header">
           <div className="sheet-title-group">
-            <MapPin size={16} style={{ color: colors.border, flexShrink: 0 }} />
+            <MapPin size={16} className={`risk-marker-color risk-marker-color--${riskClassName}`} />
             <h3 className="sheet-title">{signal.areaName}</h3>
           </div>
           <button type="button" className="sheet-close-btn" onClick={onClose}>
@@ -45,10 +38,7 @@ export const RiskDetailsSheet: React.FC<RiskDetailsSheetProps> = ({ signal, onCl
         </div>
 
         {/* Risk level badge */}
-        <div
-          className="risk-level-badge"
-          style={{ color: colors.text, backgroundColor: colors.bg, borderColor: colors.border }}
-        >
+        <div className={`risk-level-badge risk-level-badge--${riskClassName}`}>
           <AlertTriangle size={14} />
           <span>{signal.riskLevel} Risk</span>
         </div>

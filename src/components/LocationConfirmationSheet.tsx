@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CircleMarker, MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
 import type { LatLngTuple } from 'leaflet';
 import { Crosshair, MapPin, Navigation, X } from 'lucide-react';
+import { MARKER_STROKE_COLOR, PENDING_REPORT_COLOR } from '../data/safetySignalPalette';
 
 const KOLKATA_CENTER: LatLngTuple = [22.5726, 88.3639];
 
@@ -185,7 +186,12 @@ export const LocationConfirmationSheet: React.FC<LocationConfirmationSheetProps>
                   <CircleMarker
                     center={selectedPosition}
                     radius={12}
-                    pathOptions={{ fillColor: '#7E22CE', fillOpacity: 0.9, color: '#FFFFFF', weight: 3 }}
+                    pathOptions={{
+                      fillColor: PENDING_REPORT_COLOR,
+                      fillOpacity: 0.9,
+                      color: MARKER_STROKE_COLOR,
+                      weight: 3,
+                    }}
                   />
                 )}
               </MapContainer>

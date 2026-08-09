@@ -5,10 +5,14 @@ import {
   CheckCircle2,
   Info,
   MapPin,
+  Monitor,
+  Moon,
   Navigation,
+  Palette,
   RotateCcw,
   Save,
   ShieldCheck,
+  Sun,
   UserRound,
   UsersRound,
   X,
@@ -16,11 +20,16 @@ import {
 import type { CurrentLocationStatus } from '../hooks/useCurrentLocation';
 import { USER_PROFILE_FIELD_LIMITS } from '../types/userProfile';
 import type { UserProfile } from '../types/userProfile';
+import type { AppearancePreference, ResolvedAppearance } from '../types/appearance';
 
 interface ProfileProps {
   profile: UserProfile | null;
   locationStatus: CurrentLocationStatus;
   pendingReportCount: number;
+  appearancePreference: AppearancePreference;
+  activeAppearance: ResolvedAppearance;
+  appearanceSaveError: string | null;
+  onAppearanceChange: (preference: AppearancePreference) => void;
   onSaveProfile: (profile: UserProfile) => UserProfile;
   onResetDemoData: () => void;
 }
@@ -31,6 +40,12 @@ const EMPTY_PROFILE: UserProfile = {
   trustedContactPhone: '',
   homeArea: '',
 };
+
+const APPEARANCE_OPTIONS = [
+  { value: 'system', label: 'System', Icon: Monitor },
+  { value: 'light', label: 'Light', Icon: Sun },
+  { value: 'dark', label: 'Dark', Icon: Moon },
+] satisfies { value: AppearancePreference; label: string; Icon: typeof Monitor }[];
 
 const locationStatusCopy = (status: CurrentLocationStatus) => {
   switch (status) {
@@ -46,6 +61,10 @@ export const Profile: React.FC<ProfileProps> = ({
   profile,
   locationStatus,
   pendingReportCount,
+  appearancePreference,
+  activeAppearance,
+  appearanceSaveError,
+  onAppearanceChange,
   onSaveProfile,
   onResetDemoData,
 }) => {
@@ -95,6 +114,10 @@ export const Profile: React.FC<ProfileProps> = ({
 
   const locationCopy = locationStatusCopy(locationStatus);
   const reportLabel = pendingReportCount === 1 ? 'pending community report' : 'pending community reports';
+  const activeAppearanceLabel = activeAppearance === 'dark' ? 'Dark' : 'Light';
+  const appearanceStatus = appearancePreference === 'system'
+    ? `System selected · ${activeAppearanceLabel} currently active`
+    : `${activeAppearanceLabel} selected and active`;
 
   return (
     <section className="profile-screen" aria-labelledby="profile-title">
@@ -189,6 +212,44 @@ export const Profile: React.FC<ProfileProps> = ({
           <Save size={17} />Save Profile
         </button>
       </form>
+
+      <section className="profile-card profile-appearance-card" aria-labelledby="profile-appearance-title">
+        <div className="profile-section-heading">
+          <Palette size={18} />
+          <div><h3 id="profile-appearance-title">Appearance</h3><span>Saved on this device</span></div>
+        </div>
+        <fieldset
+          className="appearance-fieldset"
+          role="radiogroup"
+          aria-labelledby="profile-appearance-title"
+          aria-describedby="appearance-active-state"
+        >
+          <legend className="sr-only">Choose Nidarr appearance</legend>
+          <div className="appearance-options">
+            {APPEARANCE_OPTIONS.map(({ value, label, Icon }) => (
+              <label className="appearance-option" key={value} htmlFor={`appearance-${value}`}>
+                <input
+                  id={`appearance-${value}`}
+                  className="appearance-option-input"
+                  type="radio"
+                  name="appearance"
+                  value={value}
+                  checked={appearancePreference === value}
+                  onChange={() => onAppearanceChange(value)}
+                />
+                <Icon size={17} />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <p className="appearance-active-state" id="appearance-active-state" aria-live="polite">
+          {appearanceStatus}
+        </p>
+        {appearanceSaveError && (
+          <div className="profile-save-error" role="alert"><AlertTriangle size={16} />{appearanceSaveError}</div>
+        )}
+      </section>
 
       <section className="profile-card profile-information-card" aria-labelledby="profile-permissions-title">
         <div className="profile-section-heading">
