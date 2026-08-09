@@ -255,6 +255,12 @@ Create one **Web Service** from the repository root with these dashboard setting
 
 Add `GEMINI_API_KEY` as a secret environment variable in Render. The frontend and API share one origin, so no frontend API URL variable is required. Never commit `.env` or any Gemini key.
 
+## Deploy on Vercel
+
+Import the repository as a **Vite** project using the repository root. Use `npm ci` as the install command, `npm run build` as the build command, and `dist` as the output directory. Vercel serves the frontend build and routes `/api/*` to the shared Express API through the configuration in `vercel.json`; no start command or backend compilation command is required.
+
+Add `GEMINI_API_KEY` as a server-side environment variable for the required deployment environments. Do not add a `VITE_GEMINI_API_KEY` or frontend API-base variable, and never commit `.env` or any Gemini key. Render deployment remains supported by the separate commands above.
+
 ## Testing
 
 <details open>
