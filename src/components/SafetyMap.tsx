@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, useMap } from 'react-leaflet';
 import type { LatLngTuple } from 'leaflet';
 import { DEMO_SAFETY_SIGNALS } from '../data/demoSafetySignals';
@@ -138,7 +138,10 @@ export const SafetyMap: React.FC<SafetyMapProps> = ({
   };
 
   const nearbyCountPosition = displayPosition ?? KOLKATA_CENTER;
-  const nearbyCounts = countNearbySafetySignals(nearbyCountPosition, pendingReports);
+  const nearbyCounts = useMemo(
+    () => countNearbySafetySignals(nearbyCountPosition, pendingReports),
+    [nearbyCountPosition, pendingReports]
+  );
   const nearbyLocationLabel = displayPosition ? 'near your location' : 'near the Kolkata map start';
 
   return (

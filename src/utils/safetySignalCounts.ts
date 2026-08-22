@@ -55,10 +55,31 @@ export function summarizeNearbySafetySignals(
   };
 }
 
+/**
+ * ⚡ Performance Optimization:
+ * Directly counts nearby signals without allocating intermediate arrays
+ * or performing unnecessary risk priority calculations done in summarizeNearbySafetySignals.
+ * Eliminates garbage collection pressure on high-frequency map renders.
+ */
 export function countNearbySafetySignals(
   position: LatLngTuple,
   pendingReports: PendingCommunitySignal[]
 ): NearbySignalCounts {
-  const { demonstration, pending } = summarizeNearbySafetySignals(position, pendingReports);
+  let demonstration = 0;
+  for (let i = 0; i < DEMO_SAFETY_SIGNALS.length; i++) {
+    const signal = DEMO_SAFETY_SIGNALS[i];
+    if (isNearPosition(signal.latitude, signal.longitude, position)) {
+      demonstration++;
+    }
+  }
+
+  let pending = 0;
+  for (let i = 0; i < pendingReports.length; i++) {
+    const report = pendingReports[i];
+    if (isNearPosition(report.latitude, report.longitude, position)) {
+      pending++;
+    }
+  }
+
   return { demonstration, pending };
 }
